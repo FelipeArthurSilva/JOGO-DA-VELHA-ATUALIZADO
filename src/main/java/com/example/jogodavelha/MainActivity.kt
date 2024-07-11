@@ -11,14 +11,19 @@ import com.example.jogodavelha.databinding.ActivityMainBinding
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
+    // Lateinit para inicializar a vinculação da view mais tarde
     private lateinit var binding: ActivityMainBinding
 
+    // Constantes para os jogadores
     private val JOGADOR_X = "X"
     private val JOGADOR_O = "O"
 
+    // Array 2D para representar o tabuleiro
     private val tabuleiro = Array(3) { Array(3) { "" } }
+    // Variável para controlar o jogador atual
     private var jogadorAtual = JOGADOR_X
 
+    // Handler para lidar com atrasos na UI thread
     private val handler = Handler(Looper.getMainLooper())
 
     // Variável para armazenar o nível de dificuldade
@@ -36,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         nivelDificuldade = "dificil" // Pode ser "facil" ou "dificil"
     }
 
+    // Configura os botões e reseta o tabuleiro
     private fun setupButtons() {
         val buttons = listOf(
             binding.buttonZero, binding.buttonUm, binding.buttonDois,
@@ -48,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         resetBoard()
     }
 
+    // Reseta o tabuleiro e os botões
     private fun resetBoard() {
         val buttons = listOf(
             binding.buttonZero, binding.buttonUm, binding.buttonDois,
@@ -67,21 +74,25 @@ class MainActivity : AppCompatActivity() {
         jogadorAtual = JOGADOR_X
     }
 
+    // Handler do clique dos botões
     private fun buttonClick(view: View, index: Int) {
         val buttonSelecionado = view as Button
         buttonSelecionado.text = jogadorAtual
         buttonSelecionado.isEnabled = false
 
+        // Calcula a linha e coluna do botão clicado
         val row = index / 3
         val col = index % 3
         tabuleiro[row][col] = jogadorAtual
 
+        // Muda a aparência do botão com base no jogador atual
         if (jogadorAtual == JOGADOR_X) {
             buttonSelecionado.setBackgroundResource(R.drawable.simbolofla)
         } else {
             buttonSelecionado.setBackgroundResource(R.drawable.flu)
         }
 
+        // Verifica se há um vencedor
         val vencedor = verificaVencedor(tabuleiro)
         if (vencedor != null) {
             Toast.makeText(this, "Vencedor: $vencedor", Toast.LENGTH_LONG).show()
@@ -89,13 +100,16 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Verifica se há empate
         if (verificaEmpate()) {
             Toast.makeText(this, "Empate", Toast.LENGTH_LONG).show()
             resetBoard()
             return
         }
 
+        // Alterna o jogador atual
         jogadorAtual = if (jogadorAtual == JOGADOR_X) JOGADOR_O else JOGADOR_X
+        // Se for a vez da máquina jogar
         if (jogadorAtual == JOGADOR_O) {
             desabilitarBotoes()
             handler.postDelayed({
@@ -105,6 +119,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Função para a máquina fazer uma jogada
     private fun maquinaJogar() {
         if (nivelDificuldade == "facil") {
             jogadaFacil()
@@ -113,6 +128,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Jogada fácil, a máquina escolhe uma posição aleatória vazia
     private fun jogadaFacil() {
         val posicoesVazias = mutableListOf<Pair<Int, Int>>()
         for (i in 0 until 3) {
@@ -129,8 +145,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Jogada difícil, a máquina tenta vencer ou bloquear o jogador
     private fun jogadaDificil() {
-        // Tenta vencer ou bloquear o jogador
         val melhorJogada = melhorJogada(JOGADOR_O) ?: melhorJogada(JOGADOR_X) ?: jogadaAleatoria()
         val (linha, coluna) = melhorJogada
         val button = getButton(linha, coluna)
@@ -139,6 +155,7 @@ class MainActivity : AppCompatActivity() {
         button.isEnabled = false
         tabuleiro[linha][coluna] = JOGADOR_O
 
+        // Verifica se há um vencedor ou empate após a jogada da máquina
         val vencedor = verificaVencedor(tabuleiro)
         if (vencedor != null) {
             handler.postDelayed({
@@ -155,6 +172,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Função para encontrar a melhor jogada
     private fun melhorJogada(jogador: String): Pair<Int, Int>? {
         for (i in 0 until 3) {
             for (j in 0 until 3) {
@@ -171,6 +189,7 @@ class MainActivity : AppCompatActivity() {
         return null
     }
 
+    // Função para escolher uma jogada aleatória
     private fun jogadaAleatoria(): Pair<Int, Int> {
         val posicoesVazias = mutableListOf<Pair<Int, Int>>()
         for (i in 0 until 3) {
@@ -183,6 +202,7 @@ class MainActivity : AppCompatActivity() {
         return posicoesVazias[Random.nextInt(posicoesVazias.size)]
     }
 
+    // Função para obter um botão específico com base na linha e coluna
     private fun getButton(row: Int, col: Int): Button {
         return when (row * 3 + col) {
             0 -> binding.buttonZero
@@ -198,6 +218,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Função para verificar se há um vencedor
     private fun verificaVencedor(tabuleiro: Array<Array<String>>): String? {
         for (i in 0 until 3) {
             if (tabuleiro[i][0] == tabuleiro[i][1] && tabuleiro[i][1] == tabuleiro[i][2] && tabuleiro[i][0].isNotEmpty()) {
@@ -210,31 +231,4 @@ class MainActivity : AppCompatActivity() {
         if (tabuleiro[0][0] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][2] && tabuleiro[0][0].isNotEmpty()) {
             return tabuleiro[0][0]
         }
-        if (tabuleiro[0][2] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][0] && tabuleiro[0][2].isNotEmpty()) {
-            return tabuleiro[0][2]
-        }
-        return null
-    }
-
-    private fun verificaEmpate(): Boolean {
-        return tabuleiro.all { row -> row.all { it.isNotEmpty() } }
-    }
-
-    private fun desabilitarBotoes() {
-        val buttons = listOf(
-            binding.buttonZero, binding.buttonUm, binding.buttonDois,
-            binding.buttonTres, binding.buttonQuatro, binding.buttonCinco,
-            binding.buttonSeis, binding.buttonSete, binding.buttonOito
-        )
-        buttons.forEach { it.isEnabled = false }
-    }
-
-    private fun habilitarBotoes() {
-        val buttons = listOf(
-            binding.buttonZero, binding.buttonUm, binding.buttonDois,
-            binding.buttonTres, binding.buttonQuatro, binding.buttonCinco,
-            binding.buttonSeis, binding.buttonSete, binding.buttonOito
-        )
-        buttons.forEach { it.isEnabled = true }
-    }
-}
+        if (tabuleiro[0][2] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][0
