@@ -231,4 +231,34 @@ class MainActivity : AppCompatActivity() {
         if (tabuleiro[0][0] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][2] && tabuleiro[0][0].isNotEmpty()) {
             return tabuleiro[0][0]
         }
-        if (tabuleiro[0][2] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][0
+        if (tabuleiro[0][2] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][0] && tabuleiro[0][2].isNotEmpty()) {
+            return tabuleiro[0][2]
+        }
+        return null
+    }
+
+    // Função para verificar se há empate
+    private fun verificaEmpate(): Boolean {
+        return tabuleiro.all { row -> row.all { it.isNotEmpty() } }
+    }
+
+    // Desabilita todos os botões
+    private fun desabilitarBotoes() {
+        val buttons = listOf(
+            binding.buttonZero, binding.buttonUm, binding.buttonDois,
+            binding.buttonTres, binding.buttonQuatro, binding.buttonCinco,
+            binding.buttonSeis, binding.buttonSete, binding.buttonOito
+        )
+        buttons.forEach { it.isEnabled = false }
+    }
+
+    // Habilita todos os botões
+    private fun habilitarBotoes() {
+        val buttons = listOf(
+            binding.buttonZero, binding.buttonUm, binding.buttonDois,
+            binding.buttonTres, binding.buttonQuatro, binding.buttonCinco,
+            binding.buttonSeis, binding.buttonSete, binding.buttonOito
+        )
+        buttons.forEach { it.isEnabled = true }
+    }
+}
